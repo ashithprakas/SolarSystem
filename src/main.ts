@@ -57,35 +57,46 @@ scene.background = cubeTextureLoader.load([
   starBackground,
 ]);
 
-const textureLoader = new Three.TextureLoader();
-
 const pointLigth = new Three.PointLight(0xffffff, 10, 300, 0.2);
 scene.add(pointLigth);
 
-const sunModel = new StarModel(16, sunTexture, 0, "sun");
-const mercuryModel = new PlanetModel(3.2, mercuryTexture, 28, "mercury");
-const venusModel = new PlanetModel(5.8, venusTexture, 44, "venus");
-const earthModel = new PlanetModel(6, earthTexture, 62, "earth");
-const marsModel = new PlanetModel(4, marsTexture, 78, "mars");
-const jupiterModel = new PlanetModel(12, jupiterTexture, 100, "jupiter");
-const saturnModel = new PlanetModel(10, saturnTexture, 138, "saturn");
-saturnModel.addRingToPlanet(saturnRingTexture, 3);
-const uranusModel = new PlanetModel(7, uranusTexture, 200, "uranus");
-const neptuneModel = new PlanetModel(2.8, neptuneTexture, 200, "neptune");
-const plutoModel = new PlanetModel(2.6, plutoTexture, 216, "pluto");
+let sunModel: StarModel,
+  mercuryModel: PlanetModel,
+  venusModel: PlanetModel,
+  earthModel: PlanetModel,
+  marsModel: PlanetModel,
+  jupiterModel: PlanetModel,
+  saturnModel: PlanetModel,
+  uranusModel: PlanetModel,
+  neptuneModel: PlanetModel,
+  plutoModel: PlanetModel;
+let solarSystem: SolarSytem3DObjects = [];
 
-const solarSystem: SolarSytem3DObjects = [
-  sunModel,
-  mercuryModel,
-  venusModel,
-  earthModel,
-  marsModel,
-  jupiterModel,
-  saturnModel,
-  uranusModel,
-  neptuneModel,
-  plutoModel,
-];
+function initializeSolarSystem() {
+  sunModel = new StarModel(16, sunTexture, 0, "sun");
+  mercuryModel = new PlanetModel(3.2, mercuryTexture, 28, "mercury");
+  venusModel = new PlanetModel(5.8, venusTexture, 44, "venus");
+  earthModel = new PlanetModel(6, earthTexture, 62, "earth");
+  marsModel = new PlanetModel(4, marsTexture, 78, "mars");
+  jupiterModel = new PlanetModel(12, jupiterTexture, 100, "jupiter");
+  saturnModel = new PlanetModel(10, saturnTexture, 138, "saturn");
+  uranusModel = new PlanetModel(7, uranusTexture, 200, "uranus");
+  neptuneModel = new PlanetModel(2.8, neptuneTexture, 208, "neptune");
+  plutoModel = new PlanetModel(2.6, plutoTexture, 216, "pluto");
+
+  solarSystem = [
+    sunModel,
+    mercuryModel,
+    venusModel,
+    earthModel,
+    marsModel,
+    jupiterModel,
+    saturnModel,
+    uranusModel,
+    neptuneModel,
+    plutoModel,
+  ];
+}
 
 function addToScene() {
   solarSystem.forEach((value) => {
@@ -93,8 +104,6 @@ function addToScene() {
     scene.add(object.Object3DData);
   });
 }
-
-addToScene();
 
 //Animate code
 function rotateOnSelfAxis() {
@@ -121,20 +130,12 @@ function rotateAroundSun() {
   neptuneModel.getData().Object3DData.rotateY(0.0001 * rotationSpeed);
   plutoModel.getData().Object3DData.rotateY(0.00007 * rotationSpeed);
 }
+
 function animate() {
   renderer.render(scene, camera);
   rotateOnSelfAxis();
   rotateAroundSun();
 }
-renderer.setAnimationLoop(animate);
-
-window.addEventListener("resize", function () {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-window.addEventListener("click", onPlanetClick);
 
 function onPlanetClick(event: MouseEvent) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -159,3 +160,16 @@ function getSelectedPlanet() {
   });
   return selectedPlanet?.getData();
 }
+
+initializeSolarSystem();
+addToScene();
+
+renderer.setAnimationLoop(animate);
+
+window.addEventListener("resize", function () {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+window.addEventListener("click", onPlanetClick);
