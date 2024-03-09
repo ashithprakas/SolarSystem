@@ -16,13 +16,17 @@ import {
 } from "./textureImports";
 
 import "./style.css";
-import { Celestial3DBody } from "./Models/celestialBody.model";
+import {
+  Celestial3DObjects,
+  SolarSytem3DObjects,
+} from "./Models/celestialBody.model";
+import { PlanetModel, StarModel } from "./Helpers/PlanetCreate.helper";
 
-const rayCaster = new Three.Raycaster();
 const mouse = new Three.Vector2();
 const raycaster = new Three.Raycaster();
 const renderer = new Three.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
+const rotationSpeed = 0.3;
 
 document.body.appendChild(renderer.domElement);
 
@@ -55,130 +59,67 @@ scene.background = cubeTextureLoader.load([
 
 const textureLoader = new Three.TextureLoader();
 
-const sunGeometry = new Three.SphereGeometry(16, 30, 30);
-const sunMaterial = new Three.MeshBasicMaterial({
-  map: textureLoader.load(sunTexture),
-});
-// const sun = new Three.Mesh(sunGeometry, sunMaterial);
-// scene.add(sun);
-
 const pointLigth = new Three.PointLight(0xffffff, 10, 300, 0.2);
 scene.add(pointLigth);
 
-const sun = createStar(16, sunTexture, 0, "sun");
-const mercury = createPlanet(3.2, mercuryTexture, 28, "mercury");
-const venus = createPlanet(5.8, venusTexture, 44, "venus");
-const earth = createPlanet(6, earthTexture, 62, "earth");
-const mars = createPlanet(4, marsTexture, 78, "mars");
-const jupiter = createPlanet(12, jupiterTexture, 100, "jupiter");
-const saturn = createPlanet(
-  10,
-  saturnTexture,
-  138,
-  "saturn",
-  saturnRingTexture,
-  3
-);
-const uranus = createPlanet(7, uranusTexture, 200, "uranus");
-const neptune = createPlanet(2.8, neptuneTexture, 200, "neptune");
-const pluto = createPlanet(2.6, plutoTexture, 216, "pluto");
+const sunModel = new StarModel(16, sunTexture, 0, "sun");
+const mercuryModel = new PlanetModel(3.2, mercuryTexture, 28, "mercury");
+const venusModel = new PlanetModel(5.8, venusTexture, 44, "venus");
+const earthModel = new PlanetModel(6, earthTexture, 62, "earth");
+const marsModel = new PlanetModel(4, marsTexture, 78, "mars");
+const jupiterModel = new PlanetModel(12, jupiterTexture, 100, "jupiter");
+const saturnModel = new PlanetModel(10, saturnTexture, 138, "saturn");
+saturnModel.addRingToPlanet(saturnRingTexture, 3);
+const uranusModel = new PlanetModel(7, uranusTexture, 200, "uranus");
+const neptuneModel = new PlanetModel(2.8, neptuneTexture, 200, "neptune");
+const plutoModel = new PlanetModel(2.6, plutoTexture, 216, "pluto");
 
-const planetArray: Celestial3DBody[] = [
-  sun,
-  mercury,
-  venus,
-  earth,
-  mars,
-  jupiter,
-  saturn,
-  uranus,
-  neptune,
-  pluto,
+const solarSystem: SolarSytem3DObjects = [
+  sunModel,
+  mercuryModel,
+  venusModel,
+  earthModel,
+  marsModel,
+  jupiterModel,
+  saturnModel,
+  uranusModel,
+  neptuneModel,
+  plutoModel,
 ];
 
-//create planet funciton
-function createPlanet(
-  size: number,
-  texture: string,
-  position: number,
-  name: string = "",
-  ringTexture?: string,
-  innerRadius?: number,
-  outerRadius?: number
-): Celestial3DBody {
-  const planetGeometry = new Three.SphereGeometry(size, 30, 30);
-  const planetMaterial = new Three.MeshStandardMaterial({
-    map: textureLoader.load(texture),
+function addToScene() {
+  solarSystem.forEach((value) => {
+    let object = value.getData();
+    scene.add(object.Object3DData);
   });
-  const planet = new Three.Mesh(planetGeometry, planetMaterial);
-  if (ringTexture) {
-    const ringGeometry = new Three.RingGeometry(innerRadius, outerRadius, 32);
-    var pos = ringGeometry.attributes.position;
-    var v3 = new Three.Vector3();
-    for (let i = 0; i < pos.count; i = i + 1) {
-      v3.fromBufferAttribute(pos, i);
-      ringGeometry.attributes.uv.setXY(i, v3.length() < 4 ? 0 : 1, 1);
-    }
-    const ringMaterial = new Three.MeshStandardMaterial({
-      map: textureLoader.load(saturnRingTexture),
-      side: Three.DoubleSide,
-      transparent: true,
-    });
-    const ring = new Three.Mesh(ringGeometry, ringMaterial);
-    planet.add(ring);
-    ring.rotation.x = Math.PI / 2;
-  }
-  const planetObj = new Three.Object3D();
-  planetObj.name = name;
-  planetObj.add(planet);
-  planet.position.x = position;
-  scene.add(planetObj);
-  return { meshData: planet, Object3DData: planetObj };
 }
 
-function createStar(
-  size: number,
-  texture: string,
-  position: number,
-  name: string = ""
-): Celestial3DBody {
-  const starGeometry = new Three.SphereGeometry(size, 30, 30);
-  const startMaterial = new Three.MeshBasicMaterial({
-    map: textureLoader.load(texture),
-  });
-  const star = new Three.Mesh(starGeometry, startMaterial);
-  const starObj = new Three.Object3D();
-  starObj.name = name;
-  starObj.add(star);
-  star.position.x = position;
-  scene.add(starObj);
-  return { meshData: star, Object3DData: starObj };
-}
+addToScene();
 
 //Animate code
 function rotateOnSelfAxis() {
-  sun.meshData.rotateY(0.004);
-  mercury.meshData.rotateY(0.004);
-  venus.meshData.rotateY(0.002);
-  earth.meshData.rotateY(0.02);
-  mars.meshData.rotateY(0.018);
-  jupiter.meshData.rotateY(0.04);
-  saturn.meshData.rotateY(0.038);
-  uranus.meshData.rotateY(0.03);
-  neptune.meshData.rotateY(0.032);
-  pluto.meshData.rotateY(0.008);
+  sunModel.getData().meshData.rotateY(0.004 * rotationSpeed);
+  mercuryModel.getData().meshData.rotateY(0.004 * rotationSpeed);
+  venusModel.getData().meshData.rotateY(0.002 * rotationSpeed);
+  earthModel.getData().meshData.rotateY(0.02 * rotationSpeed);
+  marsModel.getData().meshData.rotateY(0.018 * rotationSpeed);
+  jupiterModel.getData().meshData.rotateY(0.04 * rotationSpeed);
+  saturnModel.getData().meshData.rotateY(0.038 * rotationSpeed);
+  uranusModel.getData().meshData.rotateY(0.03 * rotationSpeed);
+  neptuneModel.getData().meshData.rotateY(0.032 * rotationSpeed);
+  plutoModel.getData().meshData.rotateY(0.008 * rotationSpeed);
 }
 
 function rotateAroundSun() {
-  mercury.Object3DData.rotateY(0.04);
-  venus.Object3DData.rotateY(0.015);
-  earth.Object3DData.rotateY(0.01);
-  mars.Object3DData.rotateY(0.008);
-  jupiter.Object3DData.rotateY(0.002);
-  saturn.Object3DData.rotateY(0.0009);
-  uranus.Object3DData.rotateY(0.0004);
-  neptune.Object3DData.rotateY(0.0001);
-  pluto.Object3DData.rotateY(0.00007);
+  mercuryModel.getData().Object3DData.rotateY(0.04 * rotationSpeed);
+  venusModel.getData().Object3DData.rotateY(0.015 * rotationSpeed);
+  earthModel.getData().Object3DData.rotateY(0.01 * rotationSpeed);
+  marsModel.getData().Object3DData.rotateY(0.008 * rotationSpeed);
+  jupiterModel.getData().Object3DData.rotateY(0.002 * rotationSpeed);
+  saturnModel.getData().Object3DData.rotateY(0.0009 * rotationSpeed);
+  uranusModel.getData().Object3DData.rotateY(0.0004 * rotationSpeed);
+  neptuneModel.getData().Object3DData.rotateY(0.0001 * rotationSpeed);
+  plutoModel.getData().Object3DData.rotateY(0.00007 * rotationSpeed);
 }
 function animate() {
   renderer.render(scene, camera);
@@ -203,7 +144,7 @@ function onPlanetClick(event: MouseEvent) {
 }
 
 function getSelectedPlanet() {
-  let selectedPlanet: Celestial3DBody | undefined = {} as Celestial3DBody;
+  let selectedPlanet: Celestial3DObjects | undefined;
   // update the picking ray with the camera and pointer position
   raycaster.setFromCamera(mouse, camera);
 
@@ -211,10 +152,10 @@ function getSelectedPlanet() {
   const intersects = raycaster.intersectObjects(scene.children);
   intersects.forEach((intersect) => {
     if (intersect.object) {
-      selectedPlanet = planetArray.find(
-        (planet) => planet.meshData.uuid == intersect.object.uuid
+      selectedPlanet = solarSystem.find(
+        (planet) => planet.getData().meshData.uuid == intersect.object.uuid
       );
     }
   });
-  return selectedPlanet;
+  return selectedPlanet?.getData();
 }
