@@ -1,14 +1,27 @@
+import {
+  Celestial3DBody,
+  SolarSytem3DObjects,
+} from "./../Models/celestialBody.model";
 import * as Three from "three";
-import { Celestial3DBody } from "../Models/celestialBody.model";
 
 export class BaseModel {
   constructor() {}
   protected mesh: Three.Mesh = new Three.Mesh();
   protected object3D: Three.Object3D = new Three.Object3D();
   protected textureLoader = new Three.TextureLoader();
+  protected rotationYSpeed: number = 0;
+  protected revolutionYSpeed: number = 0;
 
   getData(): Celestial3DBody {
     return { meshData: this.mesh, Object3DData: this.object3D };
+  }
+
+  rotate() {
+    this.mesh.rotateY(this.rotationYSpeed);
+  }
+
+  revolve() {
+    this.object3D.rotateY(this.revolutionYSpeed);
   }
 }
 export class PlanetModel extends BaseModel {
@@ -16,10 +29,14 @@ export class PlanetModel extends BaseModel {
     size: number,
     texture: string,
     position: number,
-    name: string = ""
+    name: string,
+    rotationYSpeed: number,
+    revolutionYSpeed: number
   ) {
     super();
     this.createPlanet(size, texture, position, name);
+    this.rotationYSpeed = rotationYSpeed;
+    this.revolutionYSpeed = revolutionYSpeed;
   }
 
   createPlanet(
@@ -74,10 +91,14 @@ export class StarModel extends BaseModel {
     size: number,
     texture: string,
     position: number,
-    name: string = ""
+    name: string,
+    rotationYSpeed: number,
+    revolutionYSpeed: number
   ) {
     super();
     this.createStarData(size, texture, position, name);
+    this.rotationYSpeed = rotationYSpeed;
+    this.revolutionYSpeed = revolutionYSpeed;
   }
 
   createStarData(
@@ -99,5 +120,86 @@ export class StarModel extends BaseModel {
 
   getStarData(): Celestial3DBody {
     return { meshData: this.mesh, Object3DData: this.object3D };
+  }
+}
+
+export class SolarSystemModel {
+  private solarSytemGroup: Three.Group = new Three.Group();
+  private solarSystemChildClasses: SolarSytem3DObjects = [];
+
+  constructor(position: { x: number; y: number } = { x: 0, y: 0 }) {
+    this.solarSytemGroup.position.x = position.x;
+    this.solarSytemGroup.position.y = position.y;
+  }
+  createSun(
+    size: number,
+    texture: string,
+    position: number,
+    name: string = "",
+    rotationXSpeed: number
+  ) {
+    let sunModel = new StarModel(
+      size,
+      texture,
+      position,
+      name,
+      rotationXSpeed,
+      0
+    );
+    this.solarSytemGroup.add(sunModel.getData().Object3DData);
+    this.solarSystemChildClasses.push(sunModel);
+  }
+  createPlanetWithRing(
+    size: number,
+    texture: string,
+    position: number,
+    name: string = "",
+    rotationXSpeed: number,
+    revolutionYSpeed: number,
+    ringTexture: string,
+    innerRadius: number,
+    outerRadius?: number
+  ) {
+    let planetModel = new PlanetModel(
+      size,
+      texture,
+      position,
+      name,
+      rotationXSpeed,
+      revolutionYSpeed
+    );
+    planetModel.addRingToPlanet(ringTexture, innerRadius, outerRadius);
+    this.solarSytemGroup.add(planetModel.getData().Object3DData);
+    this.solarSystemChildClasses.push(planetModel);
+  }
+  createPlanet(
+    size: number,
+    texture: string,
+    position: number,
+    name: string = "",
+    rotationXSpeed: number,
+    revolutionYSpeed: number
+  ) {
+    let planetModel = new PlanetModel(
+      size,
+      texture,
+      position,
+      name,
+      rotationXSpeed,
+      revolutionYSpeed
+    );
+    this.solarSytemGroup.add(planetModel.getData().Object3DData);
+    this.solarSystemChildClasses.push(planetModel);
+  }
+
+  getSolarSystem() {
+    return this.solarSytemGroup;
+  }
+
+  animateAllPlanets() {
+    this.solarSystemChildClasses.forEach((object) => {
+      object.rotate();
+      object.revolve();
+    });
   }
 }
