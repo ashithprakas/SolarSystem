@@ -127,9 +127,11 @@ export class SolarSystemModel {
   private solarSytemGroup: Three.Group = new Three.Group();
   private solarSystemChildClasses: SolarSytem3DObjects = [];
 
-  constructor(position: { x: number; y: number } = { x: 0, y: 0 }) {
-    this.solarSytemGroup.position.x = position.x;
-    this.solarSytemGroup.position.y = position.y;
+  constructor(solarSystemModel: SolarSystemModel | null) {
+    if (solarSystemModel) {
+      this.solarSytemGroup = solarSystemModel.solarSytemGroup;
+      this.solarSystemChildClasses = solarSystemModel.solarSystemChildClasses;
+    }
   }
   createSun(
     size: number,
@@ -201,5 +203,12 @@ export class SolarSystemModel {
       object.rotate();
       object.revolve();
     });
+  }
+
+  updateSolarSystemPosition(
+    position: { x: number; y: number } = { x: 0, y: 0 }
+  ) {
+    this.solarSytemGroup.position.x = position.x;
+    this.solarSytemGroup.position.y = position.y;
   }
 }

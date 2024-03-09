@@ -54,7 +54,7 @@ scene.background = cubeTextureLoader.load([
   starBackground,
 ]);
 
-let solarSytemModel: SolarSystemModel = new SolarSystemModel({ x: 0, y: 0 });
+let solarSytemModel: SolarSystemModel = new SolarSystemModel(null);
 
 function initializeSolarSytem() {
   const pointLigth = new Three.PointLight(0xffffff, 10, 300, 0.2);
