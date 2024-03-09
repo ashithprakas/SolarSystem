@@ -53,6 +53,7 @@ export class PlanetModel extends BaseModel {
 
     this.object3D = new Three.Object3D();
     this.object3D.name = name;
+    this.mesh.name = name;
     this.object3D.add(this.mesh);
     this.mesh.position.x = position;
   }
@@ -114,6 +115,7 @@ export class StarModel extends BaseModel {
     this.mesh = new Three.Mesh(starGeometry, startMaterial);
     this.object3D = new Three.Object3D();
     this.object3D.name = name;
+    this.mesh.name = name;
     this.object3D.add(this.mesh);
     this.mesh.position.x = position;
   }

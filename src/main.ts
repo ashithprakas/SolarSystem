@@ -73,7 +73,8 @@ function initializeSolarSytem() {
     0.038,
     0.0009,
     saturnRingTexture,
-    3
+    3,
+    20
   );
   solarSytemModel.createPlanet(7, uranusTexture, 180, "uranus", 0.03, 0.0004);
   solarSytemModel.createPlanet(
