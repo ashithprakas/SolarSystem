@@ -213,4 +213,8 @@ export class SolarSystemModel {
     this.solarSytemGroup.position.x = position.x;
     this.solarSytemGroup.position.y = position.y;
   }
+
+  getSolarSystemPlantes() {
+    return this.solarSystemChildClasses;
+  }
 }

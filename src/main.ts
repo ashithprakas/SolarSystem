@@ -1,4 +1,5 @@
 import * as Three from "three";
+import gsap from "gsap";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import {
   earthTexture,
@@ -18,12 +19,15 @@ import {
 import "./style.css";
 import { Celestial3DObjects } from "./Models/celestialBody.model";
 import { SolarSystemModel } from "./Helpers/PlanetCreate.helper";
+import { func } from "three/examples/jsm/nodes/Nodes.js";
 
 const mouse = new Three.Vector2();
 const raycaster = new Three.Raycaster();
 const renderer = new Three.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 const rotationSpeed = 0.3;
+const initialCameraPosition = { x: -90, y: 140, z: 140 };
+let isAnimationEnabled: boolean = true;
 
 document.body.appendChild(renderer.domElement);
 
@@ -38,7 +42,11 @@ const camera = new Three.PerspectiveCamera(
 
 const orbit = new OrbitControls(camera, renderer.domElement);
 
-camera.position.set(-90, 140, 140);
+camera.position.set(
+  initialCameraPosition.x,
+  initialCameraPosition.y,
+  initialCameraPosition.z
+);
 orbit.update();
 
 const ambientLight = new Three.AmbientLight(0x333333, 2);
@@ -91,10 +99,10 @@ function initializeSolarSytem() {
 }
 
 function animate() {
-  renderer.render(scene, camera);
-  solarSytemModel.animateAllPlanets();
-  // rotateOnSelfAxis();
-  // rotateAroundSun();
+  if (isAnimationEnabled) {
+    renderer.render(scene, camera);
+    solarSytemModel.animateAllPlanets();
+  }
 }
 
 function onPlanetClick(event: MouseEvent) {
@@ -112,15 +120,25 @@ function getSelectedPlanet() {
   // calculate objects intersecting the picking ray
   const intersects = raycaster.intersectObjects(scene.children);
   intersects.forEach((intersect) => {
-    // if (intersect.object) {
-    //   selectedPlanet = solarSystem.find(
-    //     (planet) => planet.getData().meshData.uuid == intersect.object.uuid
-    //   );
-    // }
+    if (intersect.object) {
+      selectedPlanet = solarSytemModel
+        .getSolarSystemPlantes()
+        .find(
+          (planet) => planet.getData().meshData.uuid == intersect.object.uuid
+        );
+    }
+    if (selectedPlanet) {
+      console.log(selectedPlanet);
+      let newPosition = selectedPlanet.getData().meshData.position;
+      camera.position.set(newPosition.x, newPosition.y, newPosition.z);
+      // toggleAnimation(false);
+    }
   });
   return selectedPlanet?.getData();
 }
-
+function toggleAnimation(allowAnimation: boolean) {
+  isAnimationEnabled = allowAnimation;
+}
 initializeSolarSytem();
 
 renderer.setAnimationLoop(animate);
@@ -132,3 +150,8 @@ window.addEventListener("resize", function () {
 });
 
 window.addEventListener("click", onPlanetClick);
+window.addEventListener("keydown", (event: KeyboardEvent) => {
+  if (event.key == "Escape" && isAnimationEnabled == false) {
+    toggleAnimation(true);
+  }
+});
